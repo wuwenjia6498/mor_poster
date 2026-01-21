@@ -1,12 +1,11 @@
 /**
  * App 主应用组件
- * 
+ *
  * 整合编辑面板和海报画布，管理全局状态
  * 实现图片导出功能
  */
 import React, { useState, useRef, useCallback } from 'react'
-import ReactDOM from 'react-dom/client'
-import html2canvas from 'html2canvas'
+import { renderPosterToCanvas, downloadCanvas } from '@/lib/canvasRenderer'
 import EditorPanel from '@/components/EditorPanel'
 import PosterCanvas from '@/components/PosterCanvas'
 
@@ -35,84 +34,36 @@ function App() {
 
   /**
    * 下载海报
-   * 使用原始尺寸（889×1500）渲染，确保最高清晰度
+   * 使用 Canvas API 直接渲染高清图片
    */
   const handleDownload = useCallback(async () => {
     setIsExporting(true)
 
     try {
-      // 显式加载所需的字体
-      await Promise.all([
-        document.fonts.load('400 50px Caveat'),
-        document.fonts.load('600 50px Caveat'),
-        document.fonts.load('400 12px "Noto Serif SC"'),
-        document.fonts.ready
-      ])
-      
-      console.log('字体加载完成，开始创建高清画布...')
-      
-      // 创建临时隐藏容器
-      const tempDiv = document.createElement('div')
-      tempDiv.style.position = 'fixed'
-      tempDiv.style.left = '-9999px'
-      tempDiv.style.top = '0'
-      document.body.appendChild(tempDiv)
-      
-      // 创建临时根节点
-      const root = ReactDOM.createRoot(tempDiv)
-      
+      console.log('开始渲染高清海报...')
+
       // 渲染高分辨率画布（scale=2，即889×1500）
-      await new Promise((resolve) => {
-        root.render(
-          <PosterCanvas
-            date={date}
-            image={image}
-            imageSource={imageSource}
-            mainText={mainText}
-            signature={signature}
-            scale={2}
-          />
-        )
-        setTimeout(resolve, 1000) // 等待渲染完成
+      const canvas = await renderPosterToCanvas({
+        date,
+        image,
+        imageSource,
+        mainText,
+        signature,
+        scale: 2
       })
-      
-      const exportElement = tempDiv.firstChild
-      console.log('高清画布渲染完成，开始截图...')
-      
-      // 使用html2canvas导出（scale=2，最终1778×3000）
-      const canvas = await html2canvas(exportElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      })
-      
-      // 清理临时DOM
-      root.unmount()
-      document.body.removeChild(tempDiv)
-      
-      console.log('截图完成，准备下载...')
 
-      // 转换为 Blob 并下载
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob)
-          const link = document.createElement('a')
-          
-          // 生成文件名
-          const dateStr = date 
-            ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-            : 'poster'
-          
-          link.download = `老约翰早安日签_${dateStr}.png`
-          link.href = url
-          link.click()
+      console.log('渲染完成，准备下载...')
 
-          URL.revokeObjectURL(url)
-        }
-        setIsExporting(false)
-      }, 'image/png', 1.0)
+      // 生成文件名
+      const dateStr = date
+        ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+        : 'poster'
+
+      // 下载
+      await downloadCanvas(canvas, `老约翰早安日签_${dateStr}.png`)
+
+      console.log('下载完成')
+      setIsExporting(false)
     } catch (error) {
       console.error('导出失败:', error)
       alert('导出失败，请重试')
