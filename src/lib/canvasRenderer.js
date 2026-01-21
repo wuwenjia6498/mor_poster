@@ -93,7 +93,8 @@ export async function renderPosterToCanvas({
   await Promise.all([
     document.fonts.load(`400 ${50 * scale}px Caveat`),
     document.fonts.load(`600 ${15 * scale}px -apple-system`),
-    document.fonts.load(`400 ${12 * scale}px "Noto Serif SC"`),
+    document.fonts.load(`300 ${12 * scale}px "Alibaba PuHuiTi"`),
+    document.fonts.load(`300 ${12 * scale}px "PingFang SC"`),
     document.fonts.ready
   ])
 
@@ -195,8 +196,8 @@ export async function renderPosterToCanvas({
 
   // 4. 绘制图片来源
   if (imageSource) {
-    ctx.font = `300 ${9 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
-    ctx.fillStyle = '#999999'
+    ctx.font = `300 ${9 * scale}px "Alibaba PuHuiTi Light", "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", sans-serif`
+    ctx.fillStyle = '#333333'
     ctx.textAlign = 'right'
     ctx.textBaseline = 'top'
     ctx.fillText(`图·${imageSource}`, width - 29 * scale, 210 * scale + 170 * scale + 3 * scale)
@@ -207,18 +208,19 @@ export async function renderPosterToCanvas({
   const textY = 440 * scale
 
   if (mainText) {
-    ctx.font = `400 ${12 * scale}px "Noto Serif SC", serif`
-    ctx.fillStyle = '#777777'
+    // 主文案使用阿里巴巴普惠体 Light
+    ctx.font = `300 ${13 * scale}px "Alibaba PuHuiTi Light", "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", sans-serif`
+    ctx.fillStyle = '#333333'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
     drawMultilineText(ctx, mainText, textX, textY, 12 * scale * 1.5)
   }
 
-  // 6. 绘制落款
+  // 6. 绘制落款（与主文案字体保持一致）
   if (signature) {
     const signatureY = textY + (mainText ? mainText.split('\n').length * 12 * scale * 1.5 + 4 * scale : 0)
-    ctx.font = `400 ${12 * scale}px "Noto Serif SC", serif`
-    ctx.fillStyle = '#777777'
+    ctx.font = `300 ${13 * scale}px "Alibaba PuHuiTi Light", "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", sans-serif`
+    ctx.fillStyle = '#333333'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
     ctx.fillText(`——《${signature}》`, textX, signatureY)
