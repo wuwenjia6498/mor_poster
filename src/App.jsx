@@ -21,10 +21,7 @@ function App() {
   const [imageSource, setImageSource] = useState('来自儿童文学《猫》')
   
   // 主文案内容
-  const [mainText, setMainText] = useState('非虚构类书籍是均衡阅读饮食的一部分，\n它们在让孩子接触各种题材\n和文本类型方面非常有用。')
-  
-  // 落款来源
-  const [signature, setSignature] = useState('如何让孩子爱上阅读')
+  const [mainText, setMainText] = useState('非虚构类书籍是均衡阅读饮食的一部分，\n它们在让孩子接触各种题材\n和文本类型方面非常有用。\n——《小学生如何阅读一本小说》')
   
   // 导出状态
   const [isExporting, setIsExporting] = useState(false)
@@ -48,7 +45,6 @@ function App() {
         image,
         imageSource,
         mainText,
-        signature,
         scale: 2
       })
 
@@ -69,7 +65,7 @@ function App() {
       alert('导出失败，请重试')
       setIsExporting(false)
     }
-  }, [date, image, imageSource, mainText, signature])
+  }, [date, image, imageSource, mainText])
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -83,8 +79,6 @@ function App() {
         setImageSource={setImageSource}
         mainText={mainText}
         setMainText={setMainText}
-        signature={signature}
-        setSignature={setSignature}
         onDownload={handleDownload}
         isExporting={isExporting}
       />
@@ -104,7 +98,6 @@ function App() {
             image={image}
             imageSource={imageSource}
             mainText={mainText}
-            signature={signature}
           />
         </div>
       </div>

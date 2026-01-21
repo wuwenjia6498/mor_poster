@@ -7,11 +7,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 引入阿里巴巴普惠体字体 */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
-
-/* 备用：从阿里云CDN引入阿里巴巴普惠体（如果有提供的话，这里使用思源黑体作为相似替代） */
-/* 阿里巴巴普惠体可以从阿里云CDN加载，或者使用本地字体文件 */
+/* 引入 Noto Sans SC 字体，包含轻字重 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&display=swap');
 
 /* shadcn/ui 所需的 CSS 变量 */
 @layer base {
@@ -45,7 +42,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans SC", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
   }
 }
 

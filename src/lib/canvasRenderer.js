@@ -61,7 +61,6 @@ function drawMultilineText(ctx, text, x, y, lineHeight) {
  * @param {string} options.image - 图片 URL
  * @param {string} options.imageSource - 图片来源
  * @param {string} options.mainText - 主文案
- * @param {string} options.signature - 落款
  * @param {number} options.scale - 缩放比例（1=预览，2=导出）
  * @returns {Promise<HTMLCanvasElement>}
  */
@@ -70,7 +69,6 @@ export async function renderPosterToCanvas({
   image,
   imageSource,
   mainText,
-  signature,
   scale = 1
 }) {
   // 基础尺寸
@@ -196,8 +194,8 @@ export async function renderPosterToCanvas({
 
   // 4. 绘制图片来源
   if (imageSource) {
-    ctx.font = `300 ${9 * scale}px "Alibaba PuHuiTi Light", "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", sans-serif`
-    ctx.fillStyle = '#333333'
+    ctx.font = `300 ${10 * scale}px "Alibaba PuHuiTi Light", "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", sans-serif`
+    ctx.fillStyle = '#000000'
     ctx.textAlign = 'right'
     ctx.textBaseline = 'top'
     ctx.fillText(`图·${imageSource}`, width - 29 * scale, 210 * scale + 170 * scale + 3 * scale)
@@ -209,21 +207,11 @@ export async function renderPosterToCanvas({
 
   if (mainText) {
     // 主文案使用阿里巴巴普惠体 Light
-    ctx.font = `300 ${13 * scale}px "Alibaba PuHuiTi Light", "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", sans-serif`
-    ctx.fillStyle = '#333333'
+    ctx.font = `300 ${14 * scale}px "Alibaba PuHuiTi Light", "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", sans-serif`
+    ctx.fillStyle = '#111111'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
-    drawMultilineText(ctx, mainText, textX, textY, 12 * scale * 1.5)
-  }
-
-  // 6. 绘制落款（与主文案字体保持一致）
-  if (signature) {
-    const signatureY = textY + (mainText ? mainText.split('\n').length * 12 * scale * 1.5 + 4 * scale : 0)
-    ctx.font = `300 ${13 * scale}px "Alibaba PuHuiTi Light", "Alibaba PuHuiTi", "PingFang SC", "Noto Sans SC", sans-serif`
-    ctx.fillStyle = '#333333'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'top'
-    ctx.fillText(`——《${signature}》`, textX, signatureY)
+    drawMultilineText(ctx, mainText, textX, textY, 14 * scale * 1.5)
   }
 
   return canvas

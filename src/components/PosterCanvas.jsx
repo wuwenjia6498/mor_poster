@@ -11,7 +11,6 @@ const PosterCanvas = forwardRef(({
   image,
   imageSource,
   mainText,
-  signature,
   scale = 1 // 缩放比例，默认1（显示尺寸），2为导出尺寸
 }, ref) => {
   const canvasRef = useRef(null)
@@ -31,7 +30,6 @@ const PosterCanvas = forwardRef(({
           image,
           imageSource,
           mainText,
-          signature,
           scale
         })
 
@@ -47,7 +45,7 @@ const PosterCanvas = forwardRef(({
     }
 
     renderCanvas()
-  }, [date, image, imageSource, mainText, signature, scale])
+  }, [date, image, imageSource, mainText, scale])
 
   // 暴露 ref 给父组件（用于导出）
   React.useImperativeHandle(ref, () => ({
