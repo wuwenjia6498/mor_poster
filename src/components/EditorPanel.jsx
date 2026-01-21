@@ -1,17 +1,17 @@
 /**
  * EditorPanel 编辑面板组件
- * 
+ *
  * 左侧配置面板，包含：
  * - 日期选择器
- * - 图片上传
+ * - 图片上传（带裁切功能）
  * - 图片来源输入
  * - 文案编辑
  * - 落款输入
  * - 下载按钮
- * 
+ *
  * 使用 shadcn/ui 组件构建
  */
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { CalendarIcon, ImageIcon, Download, Type, FileText } from 'lucide-react'
@@ -23,6 +23,8 @@ import { Label } from '@/components/ui/label'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
+import ImageCropper from '@/components/ImageCropper'
+import { getCroppedImg, revokeBlobUrl } from '@/lib/canvasUtils'
 
 const EditorPanel = ({
   date,
@@ -41,9 +43,13 @@ const EditorPanel = ({
   // 文件上传 input 引用
   const fileInputRef = useRef(null)
 
+  // 裁切相关状态
+  const [originalImage, setOriginalImage] = useState(null) // 原始图片
+  const [isCropping, setIsCropping] = useState(false) // 是否正在裁切
+
   /**
    * 处理图片上传
-   * 读取本地文件并转换为 Data URL 用于预览
+   * 不直接设置图片，而是打开裁切弹窗
    */
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0]
@@ -53,14 +59,51 @@ const EditorPanel = ({
         alert('请上传图片文件')
         return
       }
-      
+
       // 读取文件为 Data URL
       const reader = new FileReader()
       reader.onload = (event) => {
-        setImage(event.target.result)
+        setOriginalImage(event.target.result)
+        setIsCropping(true) // 打开裁切弹窗
       }
       reader.readAsDataURL(file)
     }
+
+    // 清空 input，允许重复选择同一文件
+    e.target.value = ''
+  }
+
+  /**
+   * 裁切完成回调
+   */
+  const handleCropComplete = async (croppedAreaPixels) => {
+    try {
+      // 清理旧的 Blob URL
+      if (image) {
+        revokeBlobUrl(image)
+      }
+
+      // 获取裁切后的图片 Blob URL
+      const croppedImageUrl = await getCroppedImg(originalImage, croppedAreaPixels)
+
+      // 更新主图片状态
+      setImage(croppedImageUrl)
+
+      // 关闭裁切弹窗
+      setIsCropping(false)
+      setOriginalImage(null)
+    } catch (error) {
+      console.error('裁切图片失败:', error)
+      alert('裁切图片失败，请重试')
+    }
+  }
+
+  /**
+   * 取消裁切
+   */
+  const handleCropCancel = () => {
+    setIsCropping(false)
+    setOriginalImage(null)
   }
 
   /**
@@ -84,7 +127,7 @@ const EditorPanel = ({
 
       {/* 表单内容区域 */}
       <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-        
+
         {/* ========== 日期选择 ========== */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-gray-700">
@@ -115,13 +158,13 @@ const EditorPanel = ({
           </Popover>
         </div>
 
-        {/* ========== 图片上传 ========== */}
+        {/* ========== 图片上传（带裁切） ========== */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-gray-700">
             <ImageIcon className="w-4 h-4" />
             主图上传
           </Label>
-          
+
           {/* 隐藏的文件输入框 */}
           <input
             ref={fileInputRef}
@@ -130,9 +173,9 @@ const EditorPanel = ({
             onChange={handleImageUpload}
             className="hidden"
           />
-          
+
           {/* 上传区域 */}
-          <div 
+          <div
             onClick={triggerFileInput}
             className={cn(
               "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all",
@@ -142,12 +185,12 @@ const EditorPanel = ({
           >
             {image ? (
               <div className="space-y-2">
-                <img 
-                  src={image} 
-                  alt="预览" 
+                <img
+                  src={image}
+                  alt="预览"
                   className="w-full h-32 object-cover rounded"
                 />
-                <p className="text-sm text-gray-500">点击更换图片</p>
+                <p className="text-sm text-gray-500">点击重新上传并裁切</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -158,7 +201,7 @@ const EditorPanel = ({
                   点击上传图片
                 </p>
                 <p className="text-xs text-gray-400">
-                  支持 JPG, PNG 格式
+                  支持 JPG, PNG 格式，上传后可裁切
                 </p>
               </div>
             )}
@@ -217,7 +260,7 @@ const EditorPanel = ({
 
       {/* 底部操作栏 */}
       <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-        <Button 
+        <Button
           variant="brand"
           className="w-full h-12 text-base font-medium"
           onClick={onDownload}
@@ -239,9 +282,17 @@ const EditorPanel = ({
           )}
         </Button>
       </div>
+
+      {/* 图片裁切弹窗 */}
+      <ImageCropper
+        open={isCropping}
+        imageSrc={originalImage}
+        aspectRatio={387 / 170} // 海报主插图比例
+        onComplete={handleCropComplete}
+        onCancel={handleCropCancel}
+      />
     </div>
   )
 }
 
 export default EditorPanel
-
