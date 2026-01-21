@@ -111,19 +111,9 @@ const EditorPanel = ({
   }
 
   return (
-    <div className="w-[420px] h-screen bg-white border-r border-gray-200 flex flex-col">
-      {/* 标题栏 */}
-      <div className="px-8 py-6 border-b border-gray-100">
-        <h1 className="text-2xl font-light text-gray-900 tracking-wide">
-          老约翰早安日签
-        </h1>
-        <p className="text-sm text-gray-400 mt-2 font-light">
-          编辑海报内容，实时预览效果
-        </p>
-      </div>
-
+    <div className="flex flex-col h-full">
       {/* 表单内容区域 */}
-      <div className="flex-1 overflow-y-auto px-8 py-8 flex flex-col gap-6">
+      <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6">
 
         {/* ========== 日期选择 ========== */}
         <div className="space-y-3">
@@ -244,7 +234,7 @@ const EditorPanel = ({
       </div>
 
       {/* 底部操作栏 */}
-      <div className="px-8 py-6 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50/30">
+      <div className="px-6 py-5 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50/30">
         <Button
           variant="brand"
           className="w-full h-12 text-base font-light shadow-lg shadow-brand-red/20 hover:shadow-xl hover:shadow-brand-red/30 transition-all duration-200"
