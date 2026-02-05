@@ -15,6 +15,7 @@ export default {
         // 品牌色彩
         'brand-red': '#E55D49',
         'brand-teal': '#6EC7C0',
+        'brand-blue': '#3b5d92',
         'text-gray': '#555555',
         // shadcn/ui 所需的颜色变量
         border: "hsl(var(--border))",
@@ -23,8 +24,8 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#3b5d92",
+          foreground: "#ffffff",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
