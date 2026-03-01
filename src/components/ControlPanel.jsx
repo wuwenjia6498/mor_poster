@@ -2,7 +2,7 @@
  * ControlPanel 模板选择器组件
  *
  * 显示 4 个模板按钮，支持切换选中的模板
- * 品牌色：#3b5d92
+ * 品牌色：#385a91
  */
 import React from 'react'
 import { TEMPLATES } from '@/config/templatesConfig'
@@ -58,6 +58,7 @@ function TemplateButton({ template, label, isSelected, onClick }) {
       onClick={onClick}
       className={`
         flex-1 px-2.5 py-1.5 rounded-md font-medium text-xs
+        
         transition-all duration-200
         focus:outline-none focus:ring-1 focus:ring-brand-blue
         ${isSelected

@@ -284,7 +284,7 @@ export const TEMPLATES = [
     date: {
       // 月份英文缩写（左下角）
       monthEn: {
-        x: 130, // 往左移20px (150 - 20)
+        x: 130, // 默认位置（Mar./May. 会在渲染时动态调整）
         y: 748, // 往下移20px (728 + 20)
         font: {
           weight: 400,
@@ -397,7 +397,7 @@ export const TEMPLATES = [
     date: {
       // 月份英文缩写（左下角）
       monthEn: {
-        x: 130, // 与晚安1一致
+        x: 130, // 默认位置（Mar./May. 会在渲染时动态调整）
         y: 748, // 与晚安1一致
         font: {
           weight: 400,

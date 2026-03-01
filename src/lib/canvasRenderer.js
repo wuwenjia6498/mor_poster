@@ -167,7 +167,12 @@ function drawDateMinimalVertical(ctx, date, config, width, scale) {
     ctx.fillStyle = monthEnConfig.color
     ctx.textAlign = monthEnConfig.textAlign
     ctx.textBaseline = monthEnConfig.textBaseline
-    const monthEnX = Math.round(monthEnConfig.x * scale)
+    // 对 Mar. 和 May. 进行特殊处理，往左偏移避免盖住竖线
+    let monthEnXBase = monthEnConfig.x
+    if (monthEn === 'Mar.' || monthEn === 'May.') {
+      monthEnXBase = monthEnConfig.x - 15 // 往左移15px（减小偏移量）
+    }
+    const monthEnX = Math.round(monthEnXBase * scale)
     const monthEnY = Math.round(monthEnConfig.y * scale)
     ctx.fillText(monthEn, monthEnX, monthEnY)
 
