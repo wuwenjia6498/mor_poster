@@ -6,6 +6,15 @@
 /* 引入 Noto Sans SC 字体，包含轻字重 */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&display=swap');
 
+/* 本地字体：用于晚安模板日期数字 */
+@font-face {
+  font-family: "AURORABC";
+  src: url("/fonts/AURORABC.TTF") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -303,11 +303,11 @@ export async function renderPosterToCanvas({
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, width, height)
 
-  // 确保所有字体已加载（包括新增的 Freestyle Script 和 Bebas Neue）
+  // 确保所有字体已加载（包括晚安模板日期字体 AURORABC）
   await Promise.all([
     document.fonts.load(`400 ${50 * scale}px Caveat`),
     document.fonts.load(`400 ${80 * scale}px "Freestyle Script"`), // 晚安模板月份字体
-    document.fonts.load(`600 ${56 * scale}px "Bebas Neue"`), // 晚安模板日期字体
+    document.fonts.load(`400 ${56 * scale}px "AURORABC"`), // 晚安模板日期字体
     document.fonts.load(`600 ${15 * scale}px -apple-system`),
     document.fonts.load(`300 ${14 * scale}px "Alibaba PuHuiTi"`),
     document.fonts.load(`300 ${14 * scale}px "PingFang SC"`),

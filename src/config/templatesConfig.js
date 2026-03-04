@@ -328,9 +328,9 @@ export const TEMPLATES = [
         offsetX: 35, // 往左移20px (55 - 20)
         y: 736, // 往下移20px (716 + 20)
         font: {
-          weight: 600,
+          weight: 400,
           size: 56,
-          family: '"Bebas Neue", sans-serif', // 使用 Bebas Neue 字体
+          family: '"AURORABC", sans-serif', // 使用 AURORABC 字体
         },
         color: '#8896A9',
         textAlign: 'center',
@@ -441,9 +441,9 @@ export const TEMPLATES = [
         offsetX: 35, // 与晚安1一致
         y: 736, // 与晚安1一致
         font: {
-          weight: 600,
+          weight: 400,
           size: 56,
-          family: '"Bebas Neue", sans-serif',
+          family: '"AURORABC", sans-serif',
         },
         color: '#8896A9',
         textAlign: 'center',
