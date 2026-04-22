@@ -223,8 +223,11 @@ const EditorPanel = ({
         </div>
         )}
 
-        {/* ========== 文案内容 ========== */}
-        <div className="space-y-3 flex-1 flex flex-col">
+        {/* ========== 文案内容 ==========
+            使用固定最小高度（min-h），不再 flex-1 填充剩余空间，
+            这样无论模板是否有图片上传区，正文框高度都保持一致，
+            避免隐藏图片上传后 textarea 被撑得过大。 */}
+        <div className="space-y-3">
           <Label htmlFor="mainText" className="flex items-center gap-2 text-gray-600 font-light text-sm">
             <Type className="w-4 h-4" />
             正文内容
@@ -234,8 +237,8 @@ const EditorPanel = ({
             placeholder="输入海报正文内容..."
             value={mainText}
             onChange={(e) => setMainText(e.target.value)}
-            rows={8}
-            className="resize-none leading-relaxed text-[15px] flex-1"
+            rows={hasImage ? 8 : 10}
+            className="resize-none leading-relaxed text-[15px] min-h-[220px]"
           />
         </div>
 
