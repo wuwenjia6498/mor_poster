@@ -112,6 +112,8 @@ function App() {
             setMainText={setMainText}
             onDownload={handleDownload}
             isExporting={isExporting}
+            /* 当前模板是否需要用户上传插图：false 时隐藏相关编辑栏 */
+            hasImage={currentTemplate.hasImage !== false}
           />
         </div>
       </div>

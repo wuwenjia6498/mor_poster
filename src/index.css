@@ -15,6 +15,39 @@
   font-display: swap;
 }
 
+/* ==========================================================
+ * Freestyle Script（常规 / 加粗）- 用于晚安模板月份英文
+ *
+ * 使用 scripts/convert-fonts.mjs 从原始 TTF 转换得到的 WOFF2 文件。
+ * WOFF2 编码器会规范化内部表结构，修复原 TTF 缺 OS/2 表的问题，
+ * 可被所有现代浏览器正常加载（无需依赖系统安装字体）。
+ *
+ * 如果以后更换/新增字体，只需：
+ *   1) 把 TTF 放入 public/fonts/
+ *   2) 修改 scripts/convert-fonts.mjs 的 TARGETS 列表
+ *   3) 运行 `npm run convert-fonts`
+ * ========================================================== */
+@font-face {
+  font-family: "Freestyle Script";
+  src: local("Freestyle Script"),
+       local("FreestyleScript"),
+       url("/fonts/freestyle-script-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Freestyle Script";
+  src: local("Freestyle Script Bold"),
+       local("FreestyleScript-Bold"),
+       local("Freestyle Script"),
+       url("/fonts/freestyle-script-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

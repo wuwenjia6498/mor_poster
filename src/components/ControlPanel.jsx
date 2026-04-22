@@ -19,12 +19,10 @@ function ControlPanel({ selectedTemplateId, onTemplateChange }) {
   const morningTemplates = TEMPLATES.filter((t) => t.type === 'morning')
   const nightTemplates = TEMPLATES.filter((t) => t.type === 'night')
 
-  // 为模板添加编号
+  // 动态生成"早安-N / 晚安-N"标签，支持任意数量模板
   const templatesWithLabels = [
-    { ...morningTemplates[0], label: '早安-1' },
-    { ...morningTemplates[1], label: '早安-2' },
-    { ...nightTemplates[0], label: '晚安-1' },
-    { ...nightTemplates[1], label: '晚安-2' },
+    ...morningTemplates.map((t, i) => ({ ...t, label: `早安-${i + 1}` })),
+    ...nightTemplates.map((t, i) => ({ ...t, label: `晚安-${i + 1}` })),
   ]
 
   return (
@@ -32,8 +30,8 @@ function ControlPanel({ selectedTemplateId, onTemplateChange }) {
       {/* 标题 */}
       <h3 className="text-xs font-medium text-gray-600 mb-2">选择模板</h3>
 
-      {/* 模板按钮列表 - 横向排列 */}
-      <div className="flex gap-1.5">
+      {/* 模板按钮列表 - 横向排列，数量变多时自动换行 */}
+      <div className="flex flex-wrap gap-1.5">
         {templatesWithLabels.map((template) => (
           <TemplateButton
             key={template.id}

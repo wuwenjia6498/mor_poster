@@ -61,6 +61,47 @@ function drawMultilineText(ctx, text, x, y, lineHeight) {
 }
 
 /**
+ * 按给定像素宽度自动换行
+ *
+ * 行为：
+ *   1) 先按用户显式的 \n 拆分为段落（\n 视作强制换行）
+ *   2) 每段内部逐字符累加测量，超出 maxWidth 就换行
+ *   3) 中文按字符断行；英文整体视为字符流（单词过长会被拆开，
+ *      本项目正文主要是中文语境，不单独做英文单词边界处理）
+ *
+ * @param {CanvasRenderingContext2D} ctx - 已设置好 font 的画布上下文
+ * @param {string} text - 原始文本（可含 \n）
+ * @param {number} maxWidth - 最大像素宽度（已含 scale）
+ * @returns {string} - 用 \n 连接的新多行文本，可直接交给 drawMultilineText
+ */
+function wrapTextByWidth(ctx, text, maxWidth) {
+  if (!text) return ''
+  const paragraphs = text.split('\n')
+  const resultLines = []
+
+  for (const para of paragraphs) {
+    // 空行也要保留（用户空行等于视觉间距）
+    if (para.length === 0) {
+      resultLines.push('')
+      continue
+    }
+    let currentLine = ''
+    for (const char of para) {
+      const testLine = currentLine + char
+      if (ctx.measureText(testLine).width > maxWidth && currentLine.length > 0) {
+        resultLines.push(currentLine)
+        currentLine = char
+      } else {
+        currentLine = testLine
+      }
+    }
+    if (currentLine.length > 0) resultLines.push(currentLine)
+  }
+
+  return resultLines.join('\n')
+}
+
+/**
  * 计算实际 X 坐标
  * 支持负值（从右边距算起）和 'center'（居中）
  * 坐标取整避免亚像素渲染导致的偏移
@@ -260,6 +301,62 @@ function drawDateMinimalVertical(ctx, date, config, width, scale) {
   }
 }
 
+/**
+ * 绘制晚安3 "横向徽章"日期样式 (night_badge_horizontal)
+ *
+ * 布局：[Mar (橙色手写)]  [3 (深蓝圆徽)]  [星期二 (深蓝)]
+ * 全部横向排列于海报左下角
+ */
+function drawDateNightBadgeHorizontal(ctx, date, config, width, scale) {
+  const dateConfig = config.date
+  const monthAbbr = date ? MONTH_ABBR[date.getMonth()] : 'Jan.'
+  const day = date ? date.getDate() : 1
+  const weekday = date ? WEEKDAY_CN[date.getDay()] : '星期一'
+
+  // 1. 绘制月份英文缩写（橙色手写体）
+  const monthConfig = dateConfig.monthEn
+  // 根据 stripDot 配置决定是否去掉 "Mar." 末尾的点
+  const monthText = monthConfig.stripDot ? monthAbbr.replace('.', '') : monthAbbr
+  ctx.font = buildFontString(monthConfig.font, scale)
+  ctx.fillStyle = monthConfig.color
+  ctx.textAlign = monthConfig.textAlign
+  ctx.textBaseline = monthConfig.textBaseline
+  const monthX = Math.round(monthConfig.x * scale)
+  const monthY = Math.round(monthConfig.y * scale)
+  ctx.fillText(monthText, monthX, monthY)
+
+  // 2. 绘制深蓝圆形徽章 + 日期数字
+  const badgeConfig = dateConfig.badge
+  const cx = Math.round(badgeConfig.x * scale)
+  const cy = Math.round(badgeConfig.y * scale)
+  const r = Math.round(badgeConfig.radius * scale)
+
+  ctx.fillStyle = badgeConfig.bgColor
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  ctx.closePath()
+  ctx.fill()
+
+  // 圆徽内的日期数字
+  const textConfig = badgeConfig.text
+  ctx.font = buildFontString(textConfig.font, scale)
+  ctx.fillStyle = textConfig.color
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  const dayOffsetY = Math.round((textConfig.offsetY || 0) * scale)
+  ctx.fillText(String(day), cx, cy + dayOffsetY)
+
+  // 3. 绘制星期（圆徽右侧）
+  const weekdayConfig = dateConfig.weekday
+  ctx.font = buildFontString(weekdayConfig.font, scale)
+  ctx.fillStyle = weekdayConfig.color
+  ctx.textAlign = weekdayConfig.textAlign
+  ctx.textBaseline = weekdayConfig.textBaseline
+  const weekdayX = Math.round(weekdayConfig.x * scale)
+  const weekdayY = Math.round(weekdayConfig.y * scale)
+  ctx.fillText(weekday, weekdayX, weekdayY)
+}
+
 // ========== 主渲染函数 ==========
 
 /**
@@ -303,15 +400,19 @@ export async function renderPosterToCanvas({
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, width, height)
 
-  // 确保所有字体已加载（包括晚安模板日期字体 AURORABC）
-  await Promise.all([
+  // 尝试加载所有字体
+  // 注意：某些本地 TTF（如 FREESCPT / FRESTYSB）可能缺 OS/2 表导致
+  // Chrome OTS 校验失败、document.fonts.load() 返回的 Promise 会 reject。
+  // 因此这里使用 allSettled，任一字体失败都不阻塞渲染（走系统 fallback）。
+  await Promise.allSettled([
     document.fonts.load(`400 ${50 * scale}px Caveat`),
-    document.fonts.load(`400 ${80 * scale}px "Freestyle Script"`), // 晚安模板月份字体
-    document.fonts.load(`400 ${56 * scale}px "AURORABC"`), // 晚安模板日期字体
+    document.fonts.load(`400 ${80 * scale}px "Freestyle Script"`), // 晚安1/2 月份字体（Regular, freestyle-script-regular.woff2）
+    document.fonts.load(`700 ${56 * scale}px "Freestyle Script"`), // 晚安3 月份字体（Bold, freestyle-script-bold.woff2）
+    document.fonts.load(`400 ${56 * scale}px "AURORABC"`), // 晚安1/2 日期字体
     document.fonts.load(`600 ${15 * scale}px -apple-system`),
     document.fonts.load(`300 ${14 * scale}px "Alibaba PuHuiTi"`),
     document.fonts.load(`300 ${14 * scale}px "PingFang SC"`),
-    document.fonts.ready
+    document.fonts.ready,
   ])
 
   // 1. 绘制背景图
@@ -332,61 +433,64 @@ export async function renderPosterToCanvas({
   }
 
   // 3. 绘制主插图
-  const imgConfig = config.image
-  const imgX = Math.round(imgConfig.x * scale)
-  const imgY = Math.round(imgConfig.y * scale)
-  const imgWidth = Math.round(imgConfig.width * scale)
-  const imgHeight = Math.round(imgConfig.height * scale)
-  const imgRadius = Math.round((imgConfig.radius || 0) * scale)
+  // 仅当模板需要插图时才绘制（hasImage !== false 视为需要）
+  if (config.hasImage !== false && config.image) {
+    const imgConfig = config.image
+    const imgX = Math.round(imgConfig.x * scale)
+    const imgY = Math.round(imgConfig.y * scale)
+    const imgWidth = Math.round(imgConfig.width * scale)
+    const imgHeight = Math.round(imgConfig.height * scale)
+    const imgRadius = Math.round((imgConfig.radius || 0) * scale)
 
-  if (image) {
-    try {
-      const mainImage = await loadImage(image)
+    if (image) {
+      try {
+        const mainImage = await loadImage(image)
 
-      // 绘制圆角矩形裁剪区域
-      ctx.save()
-      if (imgRadius > 0) {
+        // 绘制圆角矩形裁剪区域
+        ctx.save()
+        if (imgRadius > 0) {
+          roundRect(ctx, imgX, imgY, imgWidth, imgHeight, imgRadius)
+          ctx.clip()
+        }
+
+        // 计算图片缩放和居中
+        const imgAspect = mainImage.width / mainImage.height
+        const boxAspect = imgWidth / imgHeight
+        let drawWidth, drawHeight, drawX, drawY
+
+        if (imgAspect > boxAspect) {
+          // 图片更宽，以高度为准
+          drawHeight = imgHeight
+          drawWidth = imgHeight * imgAspect
+          drawX = imgX - (drawWidth - imgWidth) / 2
+          drawY = imgY
+        } else {
+          // 图片更高，以宽度为准
+          drawWidth = imgWidth
+          drawHeight = imgWidth / imgAspect
+          drawX = imgX
+          drawY = imgY - (drawHeight - imgHeight) / 2
+        }
+
+        ctx.drawImage(mainImage, drawX, drawY, drawWidth, drawHeight)
+        ctx.restore()
+      } catch (error) {
+        console.error('主图加载失败:', error)
+        // 绘制占位区
+        ctx.fillStyle = '#f5f5f5'
         roundRect(ctx, imgX, imgY, imgWidth, imgHeight, imgRadius)
-        ctx.clip()
+        ctx.fill()
       }
-
-      // 计算图片缩放和居中
-      const imgAspect = mainImage.width / mainImage.height
-      const boxAspect = imgWidth / imgHeight
-      let drawWidth, drawHeight, drawX, drawY
-
-      if (imgAspect > boxAspect) {
-        // 图片更宽，以高度为准
-        drawHeight = imgHeight
-        drawWidth = imgHeight * imgAspect
-        drawX = imgX - (drawWidth - imgWidth) / 2
-        drawY = imgY
-      } else {
-        // 图片更高，以宽度为准
-        drawWidth = imgWidth
-        drawHeight = imgWidth / imgAspect
-        drawX = imgX
-        drawY = imgY - (drawHeight - imgHeight) / 2
-      }
-
-      ctx.drawImage(mainImage, drawX, drawY, drawWidth, drawHeight)
-      ctx.restore()
-    } catch (error) {
-      console.error('主图加载失败:', error)
+    } else {
       // 绘制占位区
       ctx.fillStyle = '#f5f5f5'
       roundRect(ctx, imgX, imgY, imgWidth, imgHeight, imgRadius)
       ctx.fill()
     }
-  } else {
-    // 绘制占位区
-    ctx.fillStyle = '#f5f5f5'
-    roundRect(ctx, imgX, imgY, imgWidth, imgHeight, imgRadius)
-    ctx.fill()
   }
 
-  // 4. 绘制图片来源
-  if (imageSource && config.imageSource) {
+  // 4. 绘制图片来源（仅在有插图的模板上）
+  if (config.hasImage !== false && imageSource && config.imageSource) {
     const srcConfig = config.imageSource
     ctx.font = buildFontString(srcConfig.font, scale)
     ctx.fillStyle = srcConfig.color
@@ -404,16 +508,27 @@ export async function renderPosterToCanvas({
     const textY = Math.round(textConfig.y * scale)
     const lineHeight = Math.round(textConfig.font.size * scale * textConfig.lineHeight)
 
+    // 必须先设置 font，后续 measureText 才能按正确字体量算像素宽
     ctx.font = buildFontString(textConfig.font, scale)
     ctx.fillStyle = textConfig.color
     ctx.textAlign = textConfig.textAlign
     ctx.textBaseline = textConfig.textBaseline
-    drawMultilineText(ctx, mainText, textX, textY, lineHeight)
+
+    // 如模板声明了 maxWidth，则开启自动换行；否则沿用用户手工 \n 换行
+    const renderText = textConfig.maxWidth
+      ? wrapTextByWidth(ctx, mainText, textConfig.maxWidth * scale)
+      : mainText
+
+    drawMultilineText(ctx, renderText, textX, textY, lineHeight)
   }
 
-  // 6. 如果是极简竖线样式，在最后绘制日期（底部）
+  // 6. 底部绘制日期模块（根据 styleMode 分发）
   if (config.styleMode === 'minimal_vertical') {
+    // 晚安1/2：极简竖线样式
     drawDateMinimalVertical(ctx, date, config, width, scale)
+  } else if (config.styleMode === 'night_badge_horizontal') {
+    // 晚安3：横向徽章样式（Mar + 圆徽 + 星期）
+    drawDateNightBadgeHorizontal(ctx, date, config, width, scale)
   }
 
   return canvas

@@ -36,6 +36,8 @@ const EditorPanel = ({
   setMainText,
   onDownload,
   isExporting,
+  // 当前模板是否需要上传插图，默认 true（兼容旧模板）
+  hasImage = true,
 }) => {
   // 文件上传 input 引用
   const fileInputRef = useRef(null)
@@ -145,7 +147,9 @@ const EditorPanel = ({
           </Popover>
         </div>
 
-        {/* ========== 图片上传（带裁切） ========== */}
+        {/* ========== 图片上传（带裁切） ==========
+            仅当当前模板需要插图时显示（hasImage = true） */}
+        {hasImage && (
         <div className="space-y-3">
           <Label className="flex items-center gap-2 text-gray-600 font-light text-sm">
             <ImageIcon className="w-4 h-4" />
@@ -196,8 +200,11 @@ const EditorPanel = ({
             )}
           </div>
         </div>
+        )}
 
-        {/* ========== 图片来源 ========== */}
+        {/* ========== 图片来源 ==========
+            与图片上传区一起隐藏（无插图时不需要来源标注） */}
+        {hasImage && (
         <div className="space-y-3">
           <Label htmlFor="imageSource" className="flex items-center gap-2 text-gray-600 font-light text-sm">
             <FileText className="w-4 h-4" />
@@ -214,6 +221,7 @@ const EditorPanel = ({
             将显示在图片右下角
           </p>
         </div>
+        )}
 
         {/* ========== 文案内容 ========== */}
         <div className="space-y-3 flex-1 flex flex-col">
